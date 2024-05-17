@@ -3,6 +3,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from turtlesim.srv import Kill, Spawn, SetPen
 import time
+import typer
+app = typer.Typer()
+
 
 class TurtleNavigator(Node):
 
@@ -14,28 +17,22 @@ class TurtleNavigator(Node):
             qos_profile=10
         )
 
-    def pubblish_route(self, angular_z, linear_x):
+    def pubblish_route(self, vel_theta, vel_x, vel_y):
         msg = Twist()
-        msg.angular.z = angular_z
-        msg.linear.x = linear_x
+        msg.angular.z = vel_theta
+        msg.linear.x = vel_x
+        msg.linear.y = vel_y
         self.publisher.publish(msg)
 
-def make_route(publisher):
+def make_route(publisher, vx, vy, vt, t):
 
-    caminho = [(0.0, 0.0),
-               (2.2, 0.0),
-               (0.0, 3.0),
-               (2.1, 0.0),
-               (0.0, 3.0),
-               (2.071, 0.0),
-               (0.0, 2.97),
-               (0.0, 0.0)]
+    caminho = [(vt, vx, vy, t)]
     
-    for angular_z, linear_x in caminho:
-        publisher.pubblish_drawing(angular_z, linear_x)
-        time.sleep(1)   
+    for vel_theta, vel_x, vel_y, qtd_time in caminho:
+        publisher.pubblish_route(vel_theta, vel_x, vel_y)
+        time.sleep(qtd_time)   
 
-def main():
+def main(vx: float = 2, vy: float = 0, vt: float = 0, t: int =1000):
     rclpy.init()
     service_node = rclpy.create_node('service_node')
 
@@ -45,9 +42,9 @@ def main():
     async_color_request = color_client.call_async(color_request)
     rclpy.spin_until_future_complete(service_node, async_color_request)
 
-    # Inicia a rota da tartaruga
+
     publisher = TurtleNavigator()
-    make_route(publisher)
+    make_route(publisher, vx, vy, vt, t)
     publisher.destroy_node()
 
     # Mata tartaruga atual
@@ -66,6 +63,7 @@ def main():
     # Destroi o nó
     service_node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
