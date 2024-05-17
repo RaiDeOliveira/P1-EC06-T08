@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'turtle_draw'
+package_name = 'turtle_navigator'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "draw_triangle = turtle_draw.draw_triangle:main",
+            "turtle_move = turtle_navigator.movimentation:main",
         ],
     },
 )
